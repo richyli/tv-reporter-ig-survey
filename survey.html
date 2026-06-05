@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>記者 IG 形象研究</title>
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#15181d; --line:#262a31; --txt:#e9edf2; --sub:#9aa3ad;
+    --accent:#1d6ff2; --accentdark:#0f57c9; --ok:#1f9d57; --warn:#c9a227;
+    --card-w: 320px;   /* 卡片放大：桌機單張最大寬 */
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    line-height:1.55;}
+  .wrap{max-width:900px;margin:0 auto;padding:10px 14px 24px;}
+  h1{font-size:20px;margin:.2em 0 .4em}
+  h2{font-size:17px;margin:1.1em 0 .5em}
+  p{margin:.5em 0}
+  .sub{color:var(--sub);font-size:14px}
+  .badge{display:inline-block;font-size:12px;background:var(--warn);color:#000;
+    padding:1px 8px;border-radius:10px;font-weight:700;margin-left:6px;vertical-align:middle}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:16px;margin:14px 0}
+  .btn{display:inline-block;border:none;border-radius:10px;padding:13px 20px;
+    font-size:16px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;
+    transition:.12s;}
+  .btn:hover{background:var(--accentdark)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+  .center{text-align:center}
+  .progress{height:6px;background:#23272e;border-radius:6px;overflow:hidden}
+  .progress > i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+  /* 對比題畫面：撐滿視窗高度，內容垂直分布、不留底部空白 */
+  #screen-trial{min-height:calc(100vh - 20px);display:flex}
+  .trial-panel{padding:14px 18px;margin:6px 0;flex:1 1 auto;
+    display:flex;flex-direction:column;justify-content:center;gap:10px}
+  .trial-head{flex:0 0 auto}
+  /* 進度條與標題同一行（標號 1、2：減少高度） */
+  .trial-topline{display:flex;align-items:center;gap:12px}
+  .trial-topline .small{flex:0 0 auto;white-space:nowrap}
+  .trial-topline .progress{flex:1 1 auto}
+  .prompt{font-size:18px;font-weight:700;text-align:center;margin:8px 0 8px;line-height:1.3}
+  /* 注意力檢核題：閃爍醒目，避免受測者漏看 */
+  .prompt.trap-mode{color:#000;background:var(--warn);border-radius:10px;
+    padding:12px 14px;border:2px solid #fff;animation:trapBlink .7s steps(1) infinite}
+  @keyframes trapBlink{
+    0%,100%{background:var(--warn);color:#000;box-shadow:0 0 0 4px rgba(201,162,39,.6)}
+    50%{background:#e23b3b;color:#fff;box-shadow:0 0 0 8px rgba(226,59,59,.55)}
+  }
+  /* 主區：兩卡置中、撐滿剩餘高度 */
+  .trial-body{flex:1 1 auto;display:flex;align-items:center;justify-content:center}
+  .choosearea{flex:1 1 auto;min-width:0;max-width:100%}
+  /* 下一題：夾在兩卡正中間、文字垂直直書 */
+  .nextmid{flex:0 0 auto;display:flex;align-items:center;justify-content:center;align-self:center}
+  .btn-vertical{writing-mode:vertical-rl;text-orientation:upright;letter-spacing:6px;
+    padding:18px 14px;border-radius:14px;font-size:19px;line-height:1}
+  .pair{display:flex;gap:16px;justify-content:center;align-items:flex-start;flex-wrap:nowrap}
+  /* 卡片：未選 = 暗化、灰邊；選中 = 亮邊、亮底、放大、外光暈，與背景明顯區隔 */
+  .opt{flex:1 1 0;max-width:var(--card-w);border:3px solid var(--line);border-radius:16px;
+    overflow:hidden;cursor:pointer;background:#000;transition:.15s;position:relative;
+    filter:brightness(.82);}
+  .opt:hover{border-color:#566173;filter:brightness(.95)}
+  .opt.sel{border-color:var(--accent);background:#0d1f3d;filter:brightness(1.06);
+    box-shadow:0 0 0 4px rgba(29,111,242,.55), 0 8px 26px rgba(29,111,242,.35);
+    transform:translateY(-3px) scale(1.015);}
+  .opt img{display:block;width:100%;height:auto;max-height:64vh;object-fit:cover;object-position:top}
+  /* A/B 標籤移到右上角 */
+  .opt .lab{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.62);
+    color:#fff;font-size:14px;font-weight:700;padding:3px 11px;border-radius:20px;z-index:2}
+  .opt.sel .lab{background:var(--accent)}
+  /* 選中打勾，置於 A/B 標籤左側 */
+  .opt .chk{position:absolute;top:10px;right:52px;width:30px;height:30px;border-radius:50%;
+    background:var(--accent);color:#fff;font-size:18px;font-weight:900;display:none;
+    align-items:center;justify-content:center;line-height:1;z-index:2}
+  .opt.sel .chk{display:flex}
+  .pickbar{display:flex;gap:16px;justify-content:center;margin:8px 0 0}
+  .pickbar .btn{flex:1 1 0;max-width:var(--card-w);padding:11px 18px}
+  .scale{display:flex;gap:5px;justify-content:space-between}
+  .scale label{flex:1 1 0;text-align:center;cursor:pointer}
+  .scale input{display:none}
+  .scale .dot{display:block;border:1px solid var(--line);border-radius:10px;
+    padding:10px 0;font-size:15px;background:#1b1f25;transition:.1s}
+  .scale input:checked + .dot{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+  .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-top:4px}
+  .q{font-weight:700;margin:18px 0 6px}
+  .nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+  .small{font-size:13px;color:var(--sub)}
+  .field{margin:12px 0}
+  .field > label{display:block;font-size:14px;margin-bottom:4px;font-weight:600}
+  .field input[type=text],.field input[type=url],.field input[type=number]{
+    width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);
+    background:#0e1014;color:var(--txt);font-size:14px}
+  .opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .opts label{border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;
+    background:#1b1f25;font-size:14px}
+  .opts input{display:none}
+  .opts input:checked + span{}
+  .opts label:has(input:checked){background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+  code{background:#0e1014;padding:1px 5px;border-radius:4px;font-size:12px;color:#8ec5ff}
+  .mobile-hint{display:none;text-align:center;color:var(--sub);font-size:13px;margin:-2px 0 6px}
+  .survey-section{font-size:15px;font-weight:700;color:var(--txt);margin:22px 0 6px;
+    padding-top:16px;border-top:1px solid var(--line)}
+  .survey-section:first-child{border-top:none;padding-top:0;margin-top:4px}
+  .consent-list{margin:.4em 0 1em;padding-left:1.2em}
+  .consent-list li{margin:.4em 0}
+  .consent-sign{text-align:right;color:var(--sub);margin:18px 0 8px}
+  .hide{display:none!important}
+  /* 手機：A 上 B 下垂直堆疊全寬大圖，直接點卡選取（隱藏選 A/B 按鈕） */
+  @media (max-width:560px){
+    #screen-trial{min-height:auto}
+    .trial-panel{justify-content:flex-start}
+    .trial-body{flex-direction:column;gap:12px}
+    .pair{flex-direction:column;gap:14px}
+    .opt{max-width:100%;width:100%;border-width:3px}
+    .opt img{max-height:none}            /* 手機單欄，圖吃滿寬即可，不再限高 */
+    .opt .lab{font-size:16px;padding:4px 13px}
+    .pickbar{display:none}               /* 手機改點卡片本身選取 */
+    /* 手機：下一題夾在上下兩卡之間、橫書全寬 */
+    .nextmid{width:100%}
+    .btn-vertical{writing-mode:horizontal-tb;text-orientation:mixed;letter-spacing:2px;
+      width:100%;padding:14px;font-size:18px}
+    .mobile-hint{display:block}
+    .scale .dot{padding:9px 0;font-size:14px}
+    .prompt{font-size:16px;margin:6px 0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- 0. 研究同意書 -->
+<section id="screen-consent" class="panel">
+  <h1>研究參與同意書</h1>
+  <p>您好，感謝您撥空參與本研究。本研究探討一般人對於電視台記者／主播在社群媒體上的個人形象呈現。</p>
+  <h2>研究內容</h2>
+  <p>您會看到一些虛構的記者社群媒體帳號，請依直覺選擇，沒有正確答案，結束前會問您一些背景資訊。全程約需 <b>5 分鐘</b>。</p>
+  <h2>權益與保密</h2>
+  <ul class="consent-list">
+    <li>本研究<b>完全匿名</b>，不會蒐集您的姓名、IP 或任何可識別身分的資料。</li>
+    <li>所有畫面中的人物與照片皆為 <b>AI 生成的虛構人物</b>，與任何真實個人、組織無關。</li>
+    <li>您可隨時關閉頁面終止參與，不會有任何不利影響。但還是希望您能回答到最後。</li>
+    <li>資料僅供學術研究與發表之用，結果會以群體統計方式呈現，不會呈現單一個人資訊。</li>
+  </ul>
+  <p class="consent-sign">政大新聞系　李怡志</p>
+  <button class="btn" id="btn-consent">我已閱讀並了解上述說明，且自願參與本研究</button>
+</section>
+
+<!-- 1. 前導語 -->
+<section id="screen-intro" class="panel hide">
+  <h1>作答說明</h1>
+  <p>接下來請依您的<b>第一直覺</b>作答，沒有對錯之分。</p>
+  <button class="btn" id="btn-intro-next">開始作答</button>
+</section>
+
+<!-- 2. 任務輪前導 -->
+<section id="screen-taskintro" class="panel hide">
+  <h1 id="task-title"></h1>
+  <p id="task-desc"></p>
+  <button class="btn" id="btn-task-next">開始這一輪</button>
+</section>
+
+<!-- 3. 對比題（含 trap：用同一畫面，trap 模式時題幹改為指示語） -->
+<section id="screen-trial" class="hide">
+  <div class="panel trial-panel">
+    <!-- 頂列：進度條與標題同一行 + 題幹 -->
+    <div class="trial-head">
+      <div class="trial-topline">
+        <span class="small" id="trial-counter"></span>
+        <div class="progress"><i id="trial-bar"></i></div>
+      </div>
+      <div class="prompt" id="trial-prompt"></div>
+      <div class="mobile-hint">點選下方任一張卡片即可選取</div>
+    </div>
+    <!-- 主區：兩卡並排，「下一題」夾在兩卡正中間 -->
+    <div class="trial-body">
+      <div class="choosearea">
+        <div class="pair">
+          <div class="opt" data-side="L" id="opt-L"><span class="lab">A</span><span class="chk">✓</span><img id="img-L" alt="左邊記者檔案"></div>
+          <div class="nextmid">
+            <button class="btn btn-vertical" id="btn-trial-next" disabled>下一題</button>
+          </div>
+          <div class="opt" data-side="R" id="opt-R"><span class="lab">B</span><span class="chk">✓</span><img id="img-R" alt="右邊記者檔案"></div>
+        </div>
+        <div class="pickbar">
+          <button class="btn ghost" id="pick-L">選 A（左）</button>
+          <button class="btn ghost" id="pick-R">選 B（右）</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. 後測問卷 -->
+<section id="screen-survey" class="panel hide">
+  <h1>最後幾個小問題</h1>
+  <p class="sub">以下與前面的圖片無關，請依你的實際情況作答。</p>
+  <form id="survey-form"></form>
+  <div class="nav"><span></span><button class="btn" id="btn-survey-next" disabled>送出</button></div>
+</section>
+
+<!-- 5. 完成 -->
+<section id="screen-done" class="panel hide">
+  <h1>完成了，謝謝您！🙏</h1>
+  <p id="done-msg"></p>
+  <p class="sub">您的填答已送出。本研究的每一份回應都很寶貴，感謝您的參與。</p>
+  <p class="consent-sign">政大新聞系　李怡志　敬上</p>
+  <div id="done-actions"></div>
+</section>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const show = id => { document.querySelectorAll('section').forEach(s=>s.classList.add('hide')); $(id).classList.remove('hide'); window.scrollTo(0,0); };
+
+// ===== 正式版固定參數 =====
+const ENDPOINT = 'https://api.sheetmonkey.io/form/tXMZXvs6RBeNP5s5mVdUfu'; // SheetMonkey 收件
+const TRIALS_PER_TASK = 8;   // 每輪題數（追蹤 8 + 信任 8）
+const MIN_ANSWER_SEC  = 4;   // 每題最短作答秒數（防亂答）
+
+// ---- 全域狀態 ----
+const STATE = {
+  pid: 'P' + Math.floor(performance.now()*1000).toString(36) + Math.floor(performance.now()%1000),
+  startedAt: new Date().toISOString(),
+  endpoint: ENDPOINT,
+  trialsPerTask: TRIALS_PER_TASK,
+  order: [],          // 任務順序 counterbalance
+  minAnswerSec: MIN_ANSWER_SEC,  // 每題最短作答秒數（防亂答），0=不限制
+  cards: [],
+  taskIdx: 0,
+  seq: [],            // 當前任務輪的題目序列（含 trial/trap/repeat）
+  seqIdx: 0,
+  shownAt: 0,         // 當前題顯示時間戳
+  gateTimer: null,    // 最短秒數計時器
+  current: null,      // 當前題暫存
+  responses: [],      // conjoint 對比作答（kind:trial）
+  traps: [],          // trap 結果
+  repeats: [],        // 重複一致性檢核結果
+  survey: {},         // 問卷作答
+};
+
+// 兩個任務定義
+const TASKS = {
+  follow: { key:'follow', title:'追蹤意願',
+    desc:'接下來您會看到幾次並排的個人檔案，請從中選擇您認為更容易被網友「追蹤」的帳號。',
+    prompt:'你覺得哪一位更容易增加粉絲、更容易被追蹤？' },
+  trust: { key:'trust', title:'可信度',
+    desc:'接下來請想像：當您看到一位新聞工作者報導的財經新聞後，上網查詢他的名字，然後看到了他的社群媒體帳號頁面。哪一位的帳號會讓您覺得報導<b>更可信</b>？',
+    prompt:'這兩位記者中，你認為哪一位報導的財經新聞比較可信？' },
+};
+
+// 指示型 trap（注意力檢核）：要求受測者選指定的一邊
+const TRAP = { instructSide:'L', prompt:'【注意力檢查】本題不需比較，請直接點選「左邊（A）」這一張。' };
+
+// ---- 問卷題目 ----
+// 量表構念各 2 題（7 點 Likert）；marker=藍色偏好（CMV 校正）。
+// rev:true 表反向題，分析時須反向計分。section 用於分段標題。
+const LIKERT7 = ['1 非常不同意','2','3','4 普通','5','6','7 非常同意'];
+const SURVEY = [
+  // A. 態度量表（分群 / 控制）— 本段題目每次隨機排序，降低題序效應
+  { section:'以下是一些對新聞與社群媒體的看法，請依你的同意程度作答。', shuffleNext:true },
+  { id:'psi_1',    type:'likert', q:'我常覺得螢幕上的記者／主播，像是我認識的朋友。', scale:LIKERT7 },
+  { id:'psi_2',    type:'likert', q:'我會想知道喜歡的主播私底下的生活。', scale:LIKERT7 },
+  { id:'skep_1',   type:'likert', q:'多數新聞報導並不客觀。', scale:LIKERT7 },
+  { id:'skep_2',   type:'likert', q:'我經常質疑記者報導背後的動機。', scale:LIKERT7 },
+  { id:'norm_1',   type:'likert', q:'記者在自己的私人帳號分享生活，是很正常的事。', scale:LIKERT7 },
+  { id:'norm_2',   type:'likert', q:'記者應該與商業合作保持距離。', scale:LIKERT7 },
+  { id:'sexz_1',   type:'likert', q:'女性在社群上展現身材是個人自由。', scale:LIKERT7 },
+  { id:'sexz_2',   type:'likert', q:'穿著性感的記者比較不專業。', scale:LIKERT7, rev:true },
+  { id:'marker_blue', type:'likert', q:'我很喜歡藍色。', scale:LIKERT7 },
+  // B. 行為基線
+  { section:'最後是一些關於你自己的問題。' },
+  { id:'ig_use', type:'choice', q:'你平均多久使用一次 Instagram？',
+    options:['幾乎不用','每週數次','每天','每天多次'] },
+  { id:'follow_reporter', type:'choice', q:'你是否曾在社群媒體追蹤過任何記者或主播？',
+    options:['有','沒有','不確定'] },
+  { id:'news_freq', type:'choice', q:'你平均多久接觸一次新聞？',
+    options:['幾乎不看','每週數次','每天','每天多次'] },
+  { id:'tv_trust', type:'likert', q:'整體而言，我信任台灣的電視新聞。', scale:LIKERT7 },
+  // C. 人口學（不含政治傾向）
+  { id:'sex', type:'choice', q:'你的生理性別？', options:['男','女','其他／不願透露'] },
+  { id:'age', type:'choice', q:'你的年齡層？',
+    options:['18–24','25–34','35–44','45–54','55 以上'] },
+  { id:'edu', type:'choice', q:'你的最高學歷？',
+    options:['高中職以下','專科／大學','研究所以上'] },
+];
+
+// counterbalance：用 pid 末位決定先後（測試版簡化；正式版可改伺服端分派）
+function decideOrder(){
+  const flip = (STATE.pid.charCodeAt(STATE.pid.length-1) % 2) === 0;
+  STATE.order = flip ? ['trust','follow'] : ['follow','trust'];
+}
+
+// 不重複隨機抽 n 組「不同卡」配對
+function makePairs(n){
+  const ids = STATE.cards.map(c=>c.id);
+  const pairs = [];
+  const used = new Set();
+  let guard = 0;
+  while(pairs.length < n && guard++ < 4000){
+    const a = ids[Math.floor(Math.random()*ids.length)];
+    const b = ids[Math.floor(Math.random()*ids.length)];
+    if(a===b) continue;
+    const key = [a,b].sort().join('|');
+    if(used.has(key)) continue;
+    used.add(key);
+    pairs.push(Math.random()<.5 ? [a,b] : [b,a]); // 隨機左右
+  }
+  return pairs;
+}
+function cardById(id){ return STATE.cards.find(c=>c.id===id); }
+
+// ---- 流程 ----
+// 同意書：按鈕本身即同意（一步）
+$('#btn-consent').onclick = ()=>{
+  fetch('cards.json').then(r=>r.json()).then(cards=>{
+    STATE.cards = cards;
+    decideOrder();
+    show('#screen-intro');
+  }).catch(e=>{
+    alert('問卷載入失敗，請稍後再試或更換瀏覽器。\n\n'+e);
+  });
+};
+
+$('#btn-intro-next').onclick = ()=>{ STATE.taskIdx=0; showTaskIntro(); };
+
+function showTaskIntro(){
+  const t = TASKS[STATE.order[STATE.taskIdx]];
+  $('#task-title').textContent = t.title;
+  $('#task-desc').innerHTML = t.desc;
+  show('#screen-taskintro');
+}
+$('#btn-task-next').onclick = ()=>{ buildSequence(); STATE.seqIdx=0; showItem(); };
+
+/**
+ * 建立本輪題目序列：
+ *  - n 題正交配對 trial
+ *  - 第 1 題之後插 1 題指示型 trap
+ *  - 取某一題（避開第 1 題）以「鏡像（左右對調）」在後段重複，做一致性檢核
+ * 序列範例（n=8）：T0, TRAP, T1, T2, T3, REPEAT(of Tk), T4, T5, T6, T7
+ */
+function buildSequence(){
+  const taskKey = STATE.order[STATE.taskIdx];
+  const n = STATE.trialsPerTask;
+  const pairs = makePairs(n); // n 組不重複配對
+  const trials = pairs.map((p,i)=>({ kind:'trial', task:taskKey, trial:i, idL:p[0], idR:p[1] }));
+
+  // 選一個重複來源：避開第 1 題（index 0），確保它與插入點有距離
+  const repSrcIdx = n>=3 ? (1 + Math.floor(Math.random()*(n-2))) : Math.max(0,n-1);
+  const src = trials[repSrcIdx];
+  const repeatItem = src ? { kind:'repeat', task:taskKey, ofTrial:src.trial,
+    idL:src.idR, idR:src.idL } : null; // 鏡像：左右對調
+
+  // 組序列
+  const seq = [];
+  seq.push(trials[0]);
+  if(n>=1) seq.push({ kind:'trap', task:taskKey, ...mirrorablePair(), expectSide:TRAP.instructSide });
+  for(let i=1;i<n;i++){
+    seq.push(trials[i]);
+    // 把鏡像重複題放在來源題之後約 2 題的位置（落在序列中後段）
+    if(repeatItem && i === Math.min(n-1, repSrcIdx+2)) seq.push(repeatItem);
+  }
+  // 若上面條件沒插到（極短輪），補在最後
+  if(repeatItem && !seq.includes(repeatItem)) seq.push(repeatItem);
+
+  STATE.seq = seq;
+}
+// trap 用任意一組真實卡
+function mirrorablePair(){ const p = makePairs(1)[0]; return { idL:p[0], idR:p[1] }; }
+
+// 進度：所有輪的序列長度總和
+function progressPct(){
+  const perTask = STATE.trialsPerTask + 2; // n trial + 1 trap + 1 repeat
+  const total = perTask * STATE.order.length;
+  const done = STATE.taskIdx*perTask + STATE.seqIdx;
+  return Math.min(100, done/total*100);
+}
+
+function showItem(){
+  const item = STATE.seq[STATE.seqIdx];
+  const t = TASKS[item.task];
+  STATE.current = { ...item, chosen:null, side:null };
+
+  const promptEl = $('#trial-prompt');
+  if(item.kind==='trap'){
+    promptEl.textContent = TRAP.prompt;
+    promptEl.classList.add('trap-mode');   // 閃爍提醒，避免漏看
+    $('#trial-counter').textContent = '注意力檢查';
+  } else {
+    // trial 與 repeat 對受測者外觀完全相同（repeat 不可被察覺）
+    promptEl.textContent = t.prompt;
+    promptEl.classList.remove('trap-mode');
+    $('#trial-counter').textContent = t.title;
+  }
+  renderPair(item.idL, item.idR);
+  $('#trial-bar').style.width = progressPct()+'%';
+  STATE.shownAt = performance.now(); // 計反應時間 + 最短秒數起點
+  show('#screen-trial');
+}
+
+function renderPair(idL, idR){
+  $('#img-L').src = cardById(idL).img;
+  $('#img-R').src = cardById(idR).img;
+  $('#opt-L').classList.remove('sel'); $('#opt-R').classList.remove('sel');
+  $('#btn-trial-next').disabled = true;
+  if(STATE.gateTimer){ clearInterval(STATE.gateTimer); STATE.gateTimer=null; }
+  $('#btn-trial-next').textContent = '下一題';
+}
+
+function choose(side){
+  STATE.current.side = side;
+  STATE.current.chosen = side==='L' ? STATE.current.idL : STATE.current.idR;
+  $('#opt-L').classList.toggle('sel', side==='L');
+  $('#opt-R').classList.toggle('sel', side==='R');
+  gateNext(); // 依最短秒數決定是否立刻解鎖
+}
+
+// 最短作答秒數閘門：選了之後，滿秒才解鎖「下一題」，未滿則倒數
+function gateNext(){
+  const btn = $('#btn-trial-next');
+  // 注意力檢測題不鎖時間：選了立刻解鎖
+  if(STATE.current && STATE.current.kind==='trap'){
+    if(STATE.gateTimer){ clearInterval(STATE.gateTimer); STATE.gateTimer=null; }
+    btn.disabled=false; btn.textContent='下一題'; return;
+  }
+  const minMs = (STATE.minAnswerSec||0)*1000;
+  const elapsed = performance.now() - STATE.shownAt;
+  if(STATE.gateTimer){ clearInterval(STATE.gateTimer); STATE.gateTimer=null; }
+  if(elapsed >= minMs){ btn.disabled=false; btn.textContent='下一題'; return; }
+  btn.disabled = true;
+  const tick = ()=>{
+    const left = Math.ceil((minMs - (performance.now()-STATE.shownAt))/1000);
+    if(left<=0){ clearInterval(STATE.gateTimer); STATE.gateTimer=null; btn.disabled=false; btn.textContent='下一題'; }
+    else { btn.textContent = `等 ${left} 秒`; }
+  };
+  tick();
+  STATE.gateTimer = setInterval(tick, 200);
+}
+$('#pick-L').onclick=()=>choose('L');
+$('#pick-R').onclick=()=>choose('R');
+$('#opt-L').onclick=()=>choose('L');
+$('#opt-R').onclick=()=>choose('R');
+
+$('#btn-trial-next').onclick = ()=>{
+  if($('#btn-trial-next').disabled) return; // 最短秒數未到
+  if(STATE.gateTimer){ clearInterval(STATE.gateTimer); STATE.gateTimer=null; }
+  const c = STATE.current, now = new Date().toISOString();
+  const rtMs = Math.round(performance.now() - STATE.shownAt);
+  if(c.kind==='trap'){
+    c.passed = (c.side === c.expectSide);
+    STATE.traps.push({ task:c.task, idL:c.idL, idR:c.idR, expectSide:c.expectSide, side:c.side, passed:c.passed, rtMs, t:now });
+  } else if(c.kind==='repeat'){
+    // 找原題受測者選的記者，比對是否一致（鏡像 → 比 ID 而非邊）
+    const orig = STATE.responses.find(r=>r.task===c.task && r.trial===c.ofTrial);
+    c.consistent = orig ? (orig.chosen === c.chosen) : null;
+    STATE.repeats.push({ task:c.task, ofTrial:c.ofTrial, origChosen:orig?orig.chosen:null,
+      repeatChosen:c.chosen, repeatSide:c.side, consistent:c.consistent, rtMs, t:now });
+  } else {
+    STATE.responses.push({ task:c.task, trial:c.trial, idL:c.idL, idR:c.idR, chosen:c.chosen, side:c.side, rtMs, t:now });
+  }
+
+  STATE.seqIdx++;
+  if(STATE.seqIdx < STATE.seq.length){ showItem(); return; }
+  // 換下一輪
+  STATE.taskIdx++;
+  if(STATE.taskIdx < STATE.order.length){ showTaskIntro(); return; }
+  showSurvey();
+};
+
+// ---- 問卷 ----
+// 把標記 shuffleNext 的 section 之後、到下一個 section 之前的題目隨機排序（降低題序效應）
+function buildSurveyOrder(){
+  const out = [];
+  let i = 0;
+  while(i < SURVEY.length){
+    const item = SURVEY[i];
+    if(item.section && item.shuffleNext){
+      out.push(item); i++;
+      const grp = [];
+      while(i < SURVEY.length && !SURVEY[i].section){ grp.push(SURVEY[i]); i++; }
+      for(let j=grp.length-1;j>0;j--){ const k=Math.floor(Math.random()*(j+1)); [grp[j],grp[k]]=[grp[k],grp[j]]; }
+      out.push(...grp);
+    } else { out.push(item); i++; }
+  }
+  return out;
+}
+
+function showSurvey(){
+  const f = $('#survey-form');
+  f.innerHTML = '';
+  buildSurveyOrder().forEach(item=>{
+    if(item.section){ // 分段標題
+      const h = document.createElement('div'); h.className='survey-section';
+      h.textContent = item.section; f.appendChild(h); return;
+    }
+    const div = document.createElement('div'); div.className='field';
+    let html = `<label>${item.q}${item.note?` <span class="small">${item.note}</span>`:''}</label>`;
+    if(item.type==='likert'){
+      html += `<div class="scale" data-sid="${item.id}">` +
+        item.scale.map((_,i)=>`<label><input type="radio" name="${item.id}" value="${i+1}"><span class="dot">${i+1}</span></label>`).join('') +
+        `</div><div class="ends"><span>${item.scale[0]}</span><span>${item.scale[item.scale.length-1]}</span></div>`;
+    } else {
+      html += `<div class="opts" data-sid="${item.id}">` +
+        item.options.map(o=>`<label><input type="radio" name="${item.id}" value="${o}"><span>${o}</span></label>`).join('') +
+        `</div>`;
+    }
+    div.innerHTML = html; f.appendChild(div);
+  });
+  show('#screen-survey');
+}
+
+const SURVEY_ITEMS = SURVEY.filter(it => it.id); // 排除 section 列
+$('#survey-form').addEventListener('change', e=>{
+  if(e.target.name){ STATE.survey[e.target.name] = e.target.value; }
+  const allAnswered = SURVEY_ITEMS.every(it => STATE.survey[it.id] != null);
+  $('#btn-survey-next').disabled = !allAnswered;
+});
+$('#btn-survey-next').onclick = finish;
+
+function payload(){
+  // 位置偏誤彙總：全選同一邊者事後可過濾
+  const sideCounts = { L:0, R:0 };
+  STATE.responses.forEach(r=>{ if(r.side) sideCounts[r.side]++; });
+  const nTrial = STATE.responses.length;
+  const leftRatio = nTrial ? +(sideCounts.L/nTrial).toFixed(3) : null;
+  return {
+    pid: STATE.pid,
+    startedAt: STATE.startedAt,
+    finishedAt: new Date().toISOString(),
+    taskOrder: STATE.order,
+    trialsPerTask: STATE.trialsPerTask,
+    minAnswerSec: STATE.minAnswerSec,
+    ua: navigator.userAgent,
+    responses: STATE.responses,   // 每筆含 side(L/R) 與 rtMs（反應時間）
+    traps: STATE.traps,
+    repeats: STATE.repeats,       // 重複一致性檢核
+    survey: STATE.survey,
+    quality: { sideCounts, leftRatio, nTrial }, // 位置偏誤快速指標
+  };
+}
+
+// 把巢狀資料攤平成「一人一列」的扁平物件，供 SheetMonkey/SheetDB 等表單服務直接建欄位。
+// 每輪每題拆成 f1_chosen / f1_side / f1_rtMs（f=follow）、t1_chosen…（t=trust）等欄。
+function flatten(data){
+  const flat = {
+    pid: data.pid,
+    startedAt: data.startedAt,
+    finishedAt: data.finishedAt,
+    taskOrder: (data.taskOrder||[]).join('>'),
+    trialsPerTask: data.trialsPerTask,
+    minAnswerSec: data.minAnswerSec,
+    leftRatio: data.quality ? data.quality.leftRatio : '',
+    ua: data.ua || '',
+  };
+  const pre = k => k==='follow' ? 'f' : 't'; // 任務縮寫
+  (data.responses||[]).forEach(r=>{
+    const b = pre(r.task) + (r.trial+1);
+    flat[b+'_L']=r.idL; flat[b+'_R']=r.idR; flat[b+'_chosen']=r.chosen;
+    flat[b+'_side']=r.side; flat[b+'_rtMs']=r.rtMs;
+  });
+  (data.traps||[]).forEach((r,i)=>{
+    const b='trap_'+pre(r.task);
+    flat[b+'_side']=r.side; flat[b+'_expect']=r.expectSide; flat[b+'_pass']=r.passed; flat[b+'_rtMs']=r.rtMs;
+  });
+  (data.repeats||[]).forEach((r,i)=>{
+    const b='rep_'+pre(r.task);
+    flat[b+'_of']=r.ofTrial; flat[b+'_orig']=r.origChosen; flat[b+'_again']=r.repeatChosen;
+    flat[b+'_consistent']=r.consistent; flat[b+'_rtMs']=r.rtMs;
+  });
+  Object.keys(data.survey||{}).forEach(k=>{ flat['q_'+k]=data.survey[k]; });
+  return flat;
+}
+
+function finish(){
+  const data = payload();
+  const flat = flatten(data);
+  const json = JSON.stringify(flat, null, 2);
+  show('#screen-done');
+  $('#done-msg').textContent = '資料傳送中…';
+  // SheetMonkey 接受扁平 JSON，依 key 自動建欄
+  fetch(STATE.endpoint, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(flat),
+  }).then(()=>{
+    $('#done-msg').textContent = '✓ 您的回應已成功送出。';
+  }).catch(err=>{
+    // 上傳失敗：提供備份下載，避免資料遺失
+    $('#done-msg').textContent = '網路傳送似乎不順，請下載備份檔並回傳給研究者，謝謝！';
+    addDownload(json);
+  });
+}
+
+function addDownload(json){
+  const a=document.createElement('a');
+  a.className='btn'; a.textContent='下載備份檔';
+  const blob=new Blob([json],{type:'application/json'});
+  a.href=URL.createObjectURL(blob);
+  a.download = STATE.pid + '.json';
+  $('#done-actions').innerHTML='';
+  $('#done-actions').appendChild(a);
+}
+</script>
+</body>
+</html>

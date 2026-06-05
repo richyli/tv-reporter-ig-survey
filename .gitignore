@@ -1,0 +1,23 @@
+# Public repo：只發布受測者跑問卷必需的檔案。
+# survey.html（正式問卷）+ cards.json + cards/ 圖片 會被推上去；其餘排除。
+
+# 測試版與研究內部文件（不公開）
+index.html
+README.md
+DEPLOY.md
+GOOGLE串接.md
+google_apps_script.gs
+啟動測試.bat
+
+# 作業系統 / 編輯器雜物
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+
+# 本機測試下載的作答備份
+P*.json
+*-response.json
+
+# Python 伺服器快取
+__pycache__/
