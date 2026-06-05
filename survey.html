@@ -109,16 +109,17 @@
   .hide{display:none!important}
   /* 手機：A 上 B 下垂直堆疊全寬大圖，直接點卡選取（隱藏選 A/B 按鈕） */
   @media (max-width:560px){
-    #screen-trial{min-height:auto}
-    .trial-panel{justify-content:flex-start}
-    .trial-body{flex-direction:column;gap:12px}
-    .pair{flex-direction:column;gap:14px}
-    .opt{max-width:100%;width:100%;border-width:3px}
-    .opt img{max-height:none}            /* 手機單欄，圖吃滿寬即可，不再限高 */
+    #screen-trial{min-height:auto;display:block}
+    .trial-panel{justify-content:flex-start;display:block}      /* 不撐滿、可捲動 */
+    .trial-body{display:block;flex:initial}                     /* 取消 flex 撐滿，避免卡片被壓扁 */
+    .choosearea{max-width:100%}
+    .pair{display:flex;flex-direction:column;gap:14px}
+    .opt{flex:0 0 auto;max-width:100%;width:100%;border-width:3px} /* 卡片用自然高度 */
+    .opt img{height:auto;max-height:none;object-fit:contain}     /* 圖按比例完整顯示 */
     .opt .lab{font-size:16px;padding:4px 13px}
     .pickbar{display:none}               /* 手機改點卡片本身選取 */
     /* 手機：下一題夾在上下兩卡之間、橫書全寬 */
-    .nextmid{width:100%}
+    .nextmid{width:100%;flex:0 0 auto}
     .btn-vertical{writing-mode:horizontal-tb;text-orientation:mixed;letter-spacing:2px;
       width:100%;padding:14px;font-size:18px}
     .mobile-hint{display:block}
